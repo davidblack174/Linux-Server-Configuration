@@ -1,0 +1,69 @@
+
+
+# Source the default setup script to import the username variable
+source ./linux-default-setup.sh
+
+# Use the imported username variable
+echo "Configuring network for user: $username"
+
+# Update and upgrade the system
+apt update && apt upgrade -y
+
+# Install UFW (Uncomplicated Firewall)
+apt install ufw -y
+
+# Default deny incoming traffic and allow outgoing traffic
+ufw default deny incoming
+ufw default allow outgoing
+
+# Allow SSH (replace 22 with your custom SSH port if needed)
+SSH_PORT=22
+ufw allow $SSH_PORT/tcp
+
+# Block unused ports (list of ports to be blocked)
+# Example: BLOCK_PORTS="80 443"
+BLOCK_PORTS="80 8080 8443 3306 5432 27017 27018 27019 28017 500"
+
+for port in $BLOCK_PORTS; do
+  ufw deny $port/tcp
+done
+
+# Enable the UFW firewall
+ufw enable
+
+# Harden SSH Configuration
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup existing SSH config
+cp $SSH_CONFIG $SSH_CONFIG.bak
+
+# Allow only specific users for SSH
+echo "AllowUsers $username" >> $SSH_CONFIG
+
+# Disable root login
+sed -i 's/^PermitRootLogin.*/PermitRootLogin no/' $SSH_CONFIG
+
+# Disable password authentication (only allow key-based authentication)
+sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' $SSH_CONFIG
+
+# Restart SSH service to apply changes
+systemctl restart sshd
+
+echo "Network and server hardening completed. Only user $username is allowed to SSH into the server."
+
+# Additional Security Measures (Optional)
+# Uncomment the following lines to apply additional security measures
+
+# 1. Disable unused network filesystems
+# echo "install cramfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install freevxfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install jffs2 /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install hfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install hfsplus /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install squashfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install udf /bin/true" >> /etc/modprobe.d/disablefs.conf
+
+# 2. Disable IPv6 if not needed
+# echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+# echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+# sysctl -p
