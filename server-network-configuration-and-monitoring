@@ -4,29 +4,35 @@
 source ./linux-default-setup.sh
 
 # Use the imported username variable
-echo "Configuring network for user: $username"
+#echo "Configuring network for user: $username"
 
-# Update and upgrade the system
-apt update && apt upgrade -y
+# Update and upgrade the system for Fedora, CentOS, Amazon Linux and RHEL
+sudo yum update && sudo yum upgrade -y
 
-# Install UFW (Uncomplicated Firewall)
-apt install ufw -y
+# Update and upgrade the system for Ubuntu and Debian
+#sudo apt update && sudo apt upgrade -y
+
+# Install UFW (Uncomplicated Firewall) for fedora, CentOS, Amazon Linux and RHEL
+sudo yum install ufw -y
+
+# Install UFW (Uncomplicated Firewall) for Ubuntu and Debian
+#sudo apt install ufw -y
 
 # Default deny incoming traffic and allow outgoing traffic
-ufw default deny incoming
 ufw default allow outgoing
 
 # Allow SSH (replace 22 with your custom SSH port if needed)
 SSH_PORT=22
+
 ufw allow $SSH_PORT/tcp
 
 # Block unused ports (list of ports to be blocked)
 # Example: BLOCK_PORTS="80 443"
-BLOCK_PORTS="80 8080 8443 3306 5432 27017 27018 27019 28017 500"
+#BLOCK_PORTS="8080 8443 3306 5432 27017 27018 27019 28017 500"
 
-for port in $BLOCK_PORTS; do
-  ufw deny $port/tcp
-done
+#for port in $BLOCK_PORTS; do
+#  ufw deny $port/tcp
+#done
 
 # Enable the UFW firewall
 ufw enable
