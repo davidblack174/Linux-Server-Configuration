@@ -28,6 +28,15 @@ SSH_PORT=22
 #Allow SSH (replace 22 with your custom SSH port if needed) for fedora, CentOS, Amazon Linux and RHEL
 sudo firewall-cmd --permanent --add-service=$SSH_PORT/tcp
 
+# Allow HTTP and HTTPS traffic
+#ufw allow 80/tcp
+#ufw allow 443/tcp
+
+# Allow HTTP and HTTPS traffic for fedora, CentOS, Amazon Linux and RHEL
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+
+
 # Block unused ports (list of ports to be blocked)
 # Example: BLOCK_PORTS="80 443"
 #BLOCK_PORTS="8080 8443 3306 5432 27017 27018 27019 28017 500"
