@@ -1,0 +1,100 @@
+#--------------------------------------#
+#   Created by: David Odediran
+#           Date: 10/10/2021
+#--------------------------------------#
+#--------------------------------------#
+#        What this script does
+#--------------------------------------#
+# This script is used to harden the network and server security of a Linux server.
+# It installs and configures the UFW (Uncomplicated Firewall) and applies additional security measures.
+#--------------------------------------#
+
+# Update and upgrade the system for Fedora, CentOS, Amazon Linux and RHEL
+sudo yum update && sudo yum upgrade -y
+
+# Update and upgrade the system for Ubuntu and Debian
+#sudo apt update && sudo apt upgrade -y
+
+# Install UFW (Uncomplicated Firewall) for fedora, CentOS, Amazon Linux and RHEL
+sudo yum install firewalld -y
+
+# Install UFW (Uncomplicated Firewall) for Ubuntu and Debian
+#sudo apt install ufw -y
+
+# Default deny incoming traffic and allow outgoing traffic
+sudo systemctl start firewalld
+
+
+
+# Allow SSH (replace 22 with your custom SSH port if needed)
+SSH_PORT=22
+
+#Allow SSH (replace 22 with your custom SSH port if needed) for fedora, CentOS, Amazon Linux and RHEL
+sudo firewall-cmd --permanent --add-service=$SSH_PORT/tcp
+
+# Allow HTTP and HTTPS traffic
+#ufw allow 80/tcp
+#ufw allow 443/tcp
+
+# Allow HTTP and HTTPS traffic for fedora, CentOS, Amazon Linux and RHEL
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+
+
+# Block unused ports (list of ports to be blocked) for UFW in ubuntu and debian
+# Example: BLOCK_PORTS="80 443"
+#BLOCK_PORTS="8080 8443 3306 5432 27017 27018 27019 28017 500"
+
+#for port in $BLOCK_PORTS; do
+#  ufw deny $port/tcp
+#done
+
+# Enable the UFW firewall for ubuntu and debian
+#ufw enable
+
+# Enable the UFW firewall for fedora, CentOS, Amazon Linux and RHEL
+sudo systemctl enable firewalld
+
+# Harden SSH Configuration
+SSH_CONFIG="/etc/ssh/sshd_config"
+
+# Backup existing SSH config
+cp $SSH_CONFIG $SSH_CONFIG.bak
+
+# Add AllowUsers entries for valid usernames
+while IFS=: read -r username _; do
+    if getent passwd "$username" > /dev/null; then
+        echo "AllowUsers $username" >> $SSH_CONFIG
+    fi
+done < /etc/passwd
+
+# Disable root login
+sed -i 's/^PermitRootLogin.*/PermitRootLogin no/' $SSH_CONFIG
+
+# Disable password authentication (only allow key-based authentication)
+sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' $SSH_CONFIG
+
+# Restart SSH service to apply changes
+systemctl restart sshd
+
+# Reload firewall to apply changes
+sudo firewall-cmd --reload
+
+#echo "Network and server hardening completed. Only user $username is allowed to SSH into the server."
+
+# Additional Security Measures (Optional)
+# Uncomment the following lines to apply additional security measures
+
+# 1. Disable unused network filesystems
+# echo "install cramfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install freevxfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install jffs2 /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install hfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install hfsplus /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install squashfs /bin/true" >> /etc/modprobe.d/disablefs.conf
+# echo "install udf /bin/true" >> /etc/modprobe.d/disablefs.conf
+
+# 2. Disable IPv6 if not needed
+# echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+# echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+# sysctl -p
