@@ -1,8 +1,5 @@
 
 
-# Source the default setup script to import the username variable
-source ./linux-default-setup.sh
-
 # Use the imported username variable
 #echo "Configuring network for user: $username"
 
@@ -43,8 +40,12 @@ SSH_CONFIG="/etc/ssh/sshd_config"
 # Backup existing SSH config
 cp $SSH_CONFIG $SSH_CONFIG.bak
 
-# Allow only specific users for SSH
-echo "AllowUsers $username" >> $SSH_CONFIG
+# Add AllowUsers entries for valid usernames
+while IFS=: read -r username _; do
+    if getent passwd "$username" > /dev/null; then
+        echo "AllowUsers $username" >> $SSH_CONFIG
+    fi
+done < /etc/passwd
 
 # Disable root login
 sed -i 's/^PermitRootLogin.*/PermitRootLogin no/' $SSH_CONFIG
