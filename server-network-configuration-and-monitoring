@@ -10,18 +10,23 @@ sudo yum update && sudo yum upgrade -y
 #sudo apt update && sudo apt upgrade -y
 
 # Install UFW (Uncomplicated Firewall) for fedora, CentOS, Amazon Linux and RHEL
-sudo yum install ufw -y
+sudo yum install firewalld -y
 
 # Install UFW (Uncomplicated Firewall) for Ubuntu and Debian
 #sudo apt install ufw -y
 
 # Default deny incoming traffic and allow outgoing traffic
-ufw default allow outgoing
+sudo systemctl start firewalld
+
 
 # Allow SSH (replace 22 with your custom SSH port if needed)
 SSH_PORT=22
 
-ufw allow $SSH_PORT/tcp
+#Allow SSH (replace 22 with your custom SSH port if needed) for UFW in ubuntu and debian
+#ufw allow $SSH_PORT/tcp
+
+#Allow SSH (replace 22 with your custom SSH port if needed) for fedora, CentOS, Amazon Linux and RHEL
+sudo firewall-cmd --permanent --add-service=$SSH_PORT/tcp
 
 # Block unused ports (list of ports to be blocked)
 # Example: BLOCK_PORTS="80 443"
@@ -31,8 +36,11 @@ ufw allow $SSH_PORT/tcp
 #  ufw deny $port/tcp
 #done
 
-# Enable the UFW firewall
-ufw enable
+# Enable the UFW firewall for ubuntu and debian
+#ufw enable
+
+# Enable the UFW firewall for fedora, CentOS, Amazon Linux and RHEL
+sudo systemctl enable firewalld
 
 # Harden SSH Configuration
 SSH_CONFIG="/etc/ssh/sshd_config"
@@ -56,7 +64,10 @@ sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' $SSH_CONFIG
 # Restart SSH service to apply changes
 systemctl restart sshd
 
-echo "Network and server hardening completed. Only user $username is allowed to SSH into the server."
+# Reload firewall to apply changes
+sudo firewall-cmd --reload
+
+#echo "Network and server hardening completed. Only user $username is allowed to SSH into the server."
 
 # Additional Security Measures (Optional)
 # Uncomment the following lines to apply additional security measures
