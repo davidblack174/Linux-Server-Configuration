@@ -31,7 +31,7 @@ username="david"    # Type your username
 # Encrypted password using openssl to generate it
 encrypted_password="$(openssl passwd -6 'david1234')"   # Type your password
 
-sudo useradd -c "David Odediran" $username  # Type your full name
+sudo useradd -c "David Odediran" -m /home/$username $username  # Type your full name and create a home directory for the user
 sudo usermod -aG sudo $username     # Add user to the sudo group
 sudo echo "$username:$encrypted_password" | chpasswd -e     # Set the password for the user
 sudo echo "$username ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$username     # Give the user sudo privileges
