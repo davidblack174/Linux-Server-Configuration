@@ -31,10 +31,14 @@ username="david"    # Type your username
 # Encrypted password using openssl to generate it
 encrypted_password="$(openssl passwd -6 'david1234')"   # Type your password
 
-sudo useradd -c "David Odediran" -m /home/$username $username  # Type your full name and create a home directory for the user
+sudo useradd -m -c "David Odediran" -s /bin/bash $username  # Type your full name and create a home directory for the user
 sudo usermod -aG sudo $username     # Add user to the sudo group
-sudo echo "$username:$encrypted_password" | chpasswd -e     # Set the password for the user
-sudo echo "$username ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$username     # Give the user sudo privileges
+echo "$username:$encrypted_password" | sudo chpasswd -e    # Set the password for the user
+
+echo "PS1='\u@\h:\w\$ '" | sudo tee -a /home/$username/.bashrc    # Set the prompt for the user
+sudo -u $username source /home/$username/.bashrc        # Source the bashrc file
+
+echo "$username ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$username     # Give the user sudo privileges
 echo "User $username has been created and added to the sudo group with sudo privileges."
 
 # Create alias for all users
