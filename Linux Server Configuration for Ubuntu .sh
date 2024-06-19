@@ -56,9 +56,9 @@ sudo git clone https://github.com/davidblack174/Linux-Server-Configuration
 cd Linux-Server-Configuration
 
 # Make the network configuration script executable
-chmod +x "Network Configuration for Ubuntu.sh"
+chmod +x "Network-Configuration-for-Ubuntu.sh"
 
 # Launch the network configuration script
-bash server-network-configuration-and-monitoring
+sudo bash "Network-Configuration-for-Ubuntu.sh"
 
 echo "Network configuration script has been executed."
